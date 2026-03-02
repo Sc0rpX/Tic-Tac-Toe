@@ -8,7 +8,6 @@ const Gameboard = (function() {
             board[index] = `${mark}`;
             return true;
         }
-        console.log("The place is taken! Try again!")
         return false;
     }
 
@@ -35,36 +34,85 @@ const GameController = (function() {
             [2, 4, 6]
         ]
 
-    const player1 = createPlayer("player1", "X");
-    const player2 = createPlayer("player2", "O");
+    const player1 = createPlayer("Player X", "X");
+    const player2 = createPlayer("Player O", "O");
 
     let activePlayer = player1;
     const swipePlayerTurn = () => {
         activePlayer = activePlayer === player1 ? player2 : player1;
     }
 
+    const getActivePlayer = () => activePlayer;
+
     const evaluateBoard = function() {
         let gameboard = Gameboard.getBoard();
 
-            return winningSequences.some((sequence) => 
-                sequence.every((currentValue) => gameboard[currentValue] === activePlayer.mark)
-            );
+        return winningSequences.some((sequence) => 
+            sequence.every((currentValue) => gameboard[currentValue] === activePlayer.mark)
+        );
     }
 
+    let isGameOver = false;
     const playRound = function(boardIndex) {
+        if(isGameOver){
+            return;
+        }
+
         let markPlaced = Gameboard.placeMark(activePlayer.mark, boardIndex);
         if(markPlaced) {
-            console.log(Gameboard.getBoard());
             if(evaluateBoard()){
-                console.log(`${activePlayer.name} wins the game!\n Play again.`);
-                Gameboard.resetBoard();
+                isGameOver = true;
+                displayController.updateStatus(`${activePlayer.name} wins the game!\n Play again.`);
             } else if(!Gameboard.getBoard().includes("")) {
-                console.log("It's a tie! play again");
-                Gameboard.resetBoard();
+                isGameOver = true;
+                displayController.updateStatus("It's a tie! Play again");
+            } else {
+                swipePlayerTurn();
+                displayController.updateStatus(`It's ${activePlayer.name}'s turn`)
             }
-            swipePlayerTurn();
+        } else {
+            displayController.updateStatus("The place is taken! Try again!");
         }
     }
 
-    return {playRound};
+    const newGame = function() {
+        isGameOver = false;
+        activePlayer = player1;
+    }
+
+    return {playRound, newGame, getActivePlayer};
+})();
+
+const displayController = (function() {
+    const cells = document.querySelectorAll(".cell");
+    const statusTxt = document.querySelector("#status-text");
+    const resetBtn = document.querySelector("#reset-btn");
+
+    const render = function() {
+        Gameboard.getBoard().forEach((element, index) => {
+            cells[index].textContent = element;
+        })
+    }
+
+    const updateStatus = function(str) {
+        statusTxt.textContent = str;
+    }
+
+    cells.forEach((element, index) => {
+        element.addEventListener("click", () => {
+            GameController.playRound(index);
+            render();
+        })
+    });
+
+    resetBtn.addEventListener("click", () => {
+        Gameboard.resetBoard();
+        GameController.newGame();
+        updateStatus(`It's ${GameController.getActivePlayer().name}'s turn!`);
+        render();
+    });
+
+    updateStatus(`It's ${GameController.getActivePlayer().name}'s turn!`);
+
+    return {render, updateStatus};
 })();
