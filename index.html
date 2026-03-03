@@ -33,7 +33,30 @@
       </div>
 
       <div id="status-text"></div>
-      <button id="reset-btn">Reset</button>
+      <div id="button-wrapper">
+        <button id="reset-btn">Reset</button>
+        <button id="new-game-btn">New Game</button>
+      </div>
     </div>
+
+    <!-- Overlay Dialog -->
+     <dialog id="name-entry-dialog">
+      <h2 id="dialog-title">Enter Player Names</h2>
+      <form method="dialog">
+        <div id="form-inputs">
+          <div id="left-form">
+            <label for="player1-name" class="player-name-label">Player 1:</label><br>
+            <input type="text" name="player1-name" id="player1-name" class="name-input-field">
+          </div>
+          <div id="right-form">
+            <label for="player2-name" class="player-name-label">Player 2:</label><br>
+            <input type="text" name="player2-name" id="player2-name" class="name-input-field">
+          </div>
+        </div>
+        <div id="form-button">
+          <button id="start-game">Start Game</button>
+        </div>
+      </form>
+     </dialog>
   </body>
 </html>

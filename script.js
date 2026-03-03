@@ -34,8 +34,12 @@ const GameController = (function() {
             [2, 4, 6]
         ]
 
-    const player1 = createPlayer("Player X", "X");
-    const player2 = createPlayer("Player O", "O");
+    let player1 = createPlayer("Player X", "X");
+    let player2 = createPlayer("Player O", "O");
+    const setPlayerNames = function(player1Name, player2Name){
+        player1.name = player1Name === "" ? "Player X" : player1Name;
+        player2.name = player2Name === "" ? "Player O" : player2Name;
+    }
 
     let activePlayer = player1;
     const swipePlayerTurn = () => {
@@ -80,13 +84,16 @@ const GameController = (function() {
         activePlayer = player1;
     }
 
-    return {playRound, newGame, getActivePlayer};
+    return {playRound, newGame, getActivePlayer, setPlayerNames};
 })();
 
 const displayController = (function() {
     const cells = document.querySelectorAll(".cell");
     const statusTxt = document.querySelector("#status-text");
     const resetBtn = document.querySelector("#reset-btn");
+    const newGameBtn = document.querySelector("#new-game-btn");
+    const dialog = document.querySelector("#name-entry-dialog");
+    const startBtn = document.querySelector("#start-game");
 
     const render = function() {
         Gameboard.getBoard().forEach((element, index) => {
@@ -105,14 +112,33 @@ const displayController = (function() {
         })
     });
 
-    resetBtn.addEventListener("click", () => {
+    const resetGame = function() {
         Gameboard.resetBoard();
         GameController.newGame();
         updateStatus(`It's ${GameController.getActivePlayer().name}'s turn!`);
         render();
-    });
+    }
+
+    resetBtn.addEventListener("click", resetGame);
+
+    newGameBtn.addEventListener("click", () => {
+        resetGame();
+        dialog.showModal();
+    })
+
+    startBtn.addEventListener("click", () => {
+        const player1Name = document.getElementById("player1-name");
+        const player2Name = document.getElementById("player2-name");
+
+        GameController.setPlayerNames(player1Name.value, player2Name.value);
+        updateStatus(`It's ${GameController.getActivePlayer().name}'s turn!`);
+        dialog.close();
+        player1Name.value = "";
+        player2Name.value = "";
+    })
 
     updateStatus(`It's ${GameController.getActivePlayer().name}'s turn!`);
+    dialog.showModal();
 
     return {render, updateStatus};
 })();
